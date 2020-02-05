@@ -1,5 +1,6 @@
 package com.example.myapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -15,10 +16,11 @@ import android.widget.Toast
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity() {
 
-    var questions: List<Question> = listOf<Question>(
+    private var questions: List<Question> = listOf(
         Question(R.string.question_australia, true),
         Question(R.string.question_oceans, true),
         Question(R.string.question_mideast, false),
@@ -28,18 +30,27 @@ class MainActivity : AppCompatActivity() {
 
     )
 
-    var currentIndex = 0
+    private var currentIndex = 0
 
-    val TAG: String = "MainActivity"
+    private val TAG: String = "MainActivity"
 
-    val currentIndexKey = "index"
+    private val currentIndexKey = "index"
+    private val answerCountkey = "answerCountKey"
+    private val successCountkey = "successCountkey"
+
+
+    private var successAnswerCount:Double = 0.0
+    private var answerCount = questions.size
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if( savedInstanceState != null) {
             currentIndex = savedInstanceState.getInt(currentIndexKey, 0)
+            answerCount = savedInstanceState.getInt(answerCountkey, questions.size)
+            successAnswerCount = savedInstanceState.getDouble(successCountkey, 0.0)
         }
+
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
@@ -67,10 +78,13 @@ class MainActivity : AppCompatActivity() {
         val textView: TextView = findViewById(R.id.question_text_view)
 
         val nextButton: ImageButton = findViewById(R.id.next_button)
-
         nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questions.size
-            updateQuestion(textView)
+            if (answerCount != 0) {
+                currentIndex = (currentIndex + 1) % questions.size
+                updateQuestion(textView)
+            } else {
+                showSuccessAnswers(textView)
+            }
         }
 
         val prevButton: ImageButton = findViewById(R.id.prev_button)
@@ -107,13 +121,21 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         Log.d(TAG, "onSaveInstanceState")
         outState.putInt(currentIndexKey, currentIndex)
+        outState.putInt(answerCountkey, answerCount)
+        outState.putDouble(successCountkey, successAnswerCount)
     }
 
-fun updateQuestion(textView: TextView) {
-    val nextQuestion = questions[currentIndex].textResId
-    textView.setText(nextQuestion)
+    fun updateQuestion(textView: TextView) {
+        val nextQuestion = questions[currentIndex].textResId
+        textView.setText(nextQuestion)
+        answerCount--
+    }
 
-}
+    fun showSuccessAnswers(textView: TextView) {
+        val procents:Int = ((successAnswerCount/questions.size) * 100).toInt()
+        val text = "Success answers: $procents %"
+        textView.setText(text)
+    }
 
     fun removeQestion(textView: TextView){
         val prevQuestion: Int
@@ -131,11 +153,11 @@ fun updateQuestion(textView: TextView) {
         var messageResId = 0
         if (result == answerIsTrue) {
             messageResId = R.string.correct_toast
+            successAnswerCount++
         } else {
-            messageResId = R.string.incorrect_toast;
+            messageResId = R.string.incorrect_toast
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT) .show()
-
     }
 
 
