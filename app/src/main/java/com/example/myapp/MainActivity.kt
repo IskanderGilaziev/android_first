@@ -7,6 +7,7 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -29,9 +30,17 @@ class MainActivity : AppCompatActivity() {
 
     var currentIndex = 0
 
+    val TAG: String = "MainActivity"
+
+    val currentIndexKey = "index"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if( savedInstanceState != null) {
+            currentIndex = savedInstanceState.getInt(currentIndexKey, 0)
+        }
+
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
@@ -51,8 +60,8 @@ class MainActivity : AppCompatActivity() {
 
 //        toastIncorrect.setGravity(Gravity.FILL_VERTICAL, 0, 0)
 
-        positive.setOnClickListener { checkAnswer(true) }
-        negative.setOnClickListener { checkAnswer(false) }
+        positive.setSafeOnClickListener { checkAnswer(true) }
+        negative.setSafeOnClickListener { checkAnswer(false)  }
 
 
         val textView: TextView = findViewById(R.id.question_text_view)
@@ -81,7 +90,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateQuestion(textView)
-        Log.d("MainActivity", "call create")
+        Log.d(TAG, "call create")
+    }
+
+
+    //check double click button
+    private fun View.setSafeOnClickListener(onSafeClick: (View) -> Unit) {
+        Log.d(TAG, "check double click")
+        val safeClickListener = SafeClickListener {
+            onSafeClick(it)
+        }
+        setOnClickListener(safeClickListener)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.d(TAG, "onSaveInstanceState")
+        outState.putInt(currentIndexKey, currentIndex)
     }
 
 fun updateQuestion(textView: TextView) {
@@ -133,28 +158,28 @@ fun updateQuestion(textView: TextView) {
 
     override fun onRestart() {
         super.onRestart()
-        Log.d("MainActivity", "call restart")
+        Log.d(TAG, "call restart")
     }
 
 
     override fun onResume() {
         super.onResume()
-        Log.d("MainActivity", "call resume")
+        Log.d(TAG, "call resume")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("MainActivity", "call destroy")
+        Log.d(TAG, "call destroy")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("MainActivity", "call pause")
+        Log.d(TAG, "call pause")
     }
 
     override fun onStart() {
         super.onStart()
-        Log.d("MainActivity", "call start")
+        Log.d(TAG, "call start")
 
     }
 
