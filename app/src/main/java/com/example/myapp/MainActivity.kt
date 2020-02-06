@@ -1,11 +1,7 @@
 package com.example.myapp
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -13,10 +9,9 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
-
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
-import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity() {
 
@@ -125,30 +120,30 @@ class MainActivity : AppCompatActivity() {
         outState.putDouble(successCountkey, successAnswerCount)
     }
 
-    fun updateQuestion(textView: TextView) {
+    private fun updateQuestion(textView: TextView) {
+//        Log.d(TAG, "Update question text", Exception())
         val nextQuestion = questions[currentIndex].textResId
         textView.setText(nextQuestion)
         answerCount--
     }
 
-    fun showSuccessAnswers(textView: TextView) {
+    private fun showSuccessAnswers(textView: TextView) {
         val procents:Int = ((successAnswerCount/questions.size) * 100).toInt()
         val text = "Success answers: $procents %"
-        textView.setText(text)
+        textView.text = text
     }
 
-    fun removeQestion(textView: TextView){
-        val prevQuestion: Int
-        if (currentIndex == 0) {
-            prevQuestion = questions[currentIndex].textResId
+    private fun removeQestion(textView: TextView){
+        val prevQuestion: Int = if (currentIndex == 0) {
+            questions[currentIndex].textResId
         } else {
-            prevQuestion = questions[currentIndex - 1].textResId
+            questions[currentIndex - 1].textResId
         }
         textView.setText(prevQuestion)
 
     }
 
-    fun checkAnswer(result: Boolean) {
+    private fun checkAnswer(result: Boolean) {
         val answerIsTrue = questions[currentIndex].answerTrue
         var messageResId = 0
         if (result == answerIsTrue) {

@@ -1,7 +1,6 @@
 package com.example.myapp
 
 import android.os.SystemClock
-import android.util.Log
 import android.view.View
 
 class SafeClickListener(private var defaultInterval:Int = 1000,
