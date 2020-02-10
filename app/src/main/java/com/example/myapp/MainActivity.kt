@@ -1,5 +1,7 @@
 package com.example.myapp
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -12,6 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import com.example.myapp.CheatActivity as CheatActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     private val currentIndexKey = "index"
     private val answerCountkey = "answerCountKey"
     private val successCountkey = "successCountkey"
-
+    private val REQUEST_CODE_CHEATS = 0
 
     private var successAnswerCount:Double = 0.0
     private var answerCount = questions.size
@@ -96,6 +99,13 @@ class MainActivity : AppCompatActivity() {
         textView.setOnClickListener {
             currentIndex = (currentIndex + 1) % questions.size
             updateQuestion(textView)
+        }
+
+        val cheatsButton: Button = findViewById(R.id.cheat_button)
+
+        cheatsButton.setOnClickListener {
+           val answerIsTrue = questions[currentIndex].answerTrue
+            startActivityForResult(CheatActivity.newIntent(this, answerIsTrue), REQUEST_CODE_CHEATS)
         }
 
         updateQuestion(textView)
@@ -169,6 +179,20 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+        if (requestCode == REQUEST_CODE_CHEATS) {
+            if (data == null) {
+                return
+            }
+            val isCheater = CheatActivity.wasAnswerShown(data);
         }
     }
 
