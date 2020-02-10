@@ -10,10 +10,10 @@ import android.widget.TextView
 
 class CheatActivity : AppCompatActivity() {
 
-    companion object : Intent() {
+    companion object {
 
-        private var EXTRA_ANSWER_IS_TRUE = "com.example.myapp.answer_is_true"
-        private val  EXTRA_ANSWER_SHOWN = "com.example.myapp.answer_shown"
+        private const val EXTRA_ANSWER_IS_TRUE = "com.example.myapp.answer_is_true"
+        private const val  EXTRA_ANSWER_SHOWN = "com.example.myapp.answer_shown"
 
         fun newIntent(packageContext: Context, answerIsTrue: Boolean): Intent {
             val intent = Intent(packageContext, CheatActivity::class.java)
@@ -48,6 +48,7 @@ class CheatActivity : AppCompatActivity() {
         }
     }
 
+    // Сохранение результата дочерней активности
     fun setAnswerShownResult(isAnswerShown: Boolean) {
         val intent = Intent()
         intent.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown)

@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     private var successAnswerCount:Double = 0.0
     private var answerCount = questions.size
+    private var isCheater: Boolean = false // признак того, что ответчик подсмотрел ответ
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,14 +62,6 @@ class MainActivity : AppCompatActivity() {
         val positive: Button = findViewById(R.id.true_button)
         val negative: Button = findViewById(R.id.false_button)
 
-//        val toast = Toast.makeText(this, R.string.correct_toast, Toast.LENGTH_SHORT)
-
-//        toast.setGravity(Gravity.TOP, 0, 0)
-
-//        val toastIncorrect = Toast.makeText(this, R.string.incorrect_toast, Toast.LENGTH_SHORT)
-
-//        toastIncorrect.setGravity(Gravity.FILL_VERTICAL, 0, 0)
-
         positive.setSafeOnClickListener { checkAnswer(true) }
         negative.setSafeOnClickListener { checkAnswer(false)  }
 
@@ -79,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         nextButton.setOnClickListener {
             if (answerCount != 0) {
                 currentIndex = (currentIndex + 1) % questions.size
+                isCheater = false // при выводе след запроса, считаем что клиент еще не подсмотрел ответ
                 updateQuestion(textView)
             } else {
                 showSuccessAnswers(textView)
@@ -105,6 +99,7 @@ class MainActivity : AppCompatActivity() {
 
         cheatsButton.setOnClickListener {
            val answerIsTrue = questions[currentIndex].answerTrue
+            // получить информацию от дочерней активности
             startActivityForResult(CheatActivity.newIntent(this, answerIsTrue), REQUEST_CODE_CHEATS)
         }
 
@@ -156,11 +151,15 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(result: Boolean) {
         val answerIsTrue = questions[currentIndex].answerTrue
         var messageResId = 0
-        if (result == answerIsTrue) {
-            messageResId = R.string.correct_toast
-            successAnswerCount++
+        if (isCheater) {
+            messageResId = R.string.judgment_toast
         } else {
-            messageResId = R.string.incorrect_toast
+            if (result == answerIsTrue) {
+                messageResId = R.string.correct_toast
+                successAnswerCount++
+            } else {
+                messageResId = R.string.incorrect_toast
+            }
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT) .show()
     }
@@ -182,7 +181,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
+    // Получение данных от дочерней активности
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != Activity.RESULT_OK) {
@@ -192,7 +191,7 @@ class MainActivity : AppCompatActivity() {
             if (data == null) {
                 return
             }
-            val isCheater = CheatActivity.wasAnswerShown(data);
+            isCheater = CheatActivity.wasAnswerShown(data) // получение от дочерней активности результата подсмотра ответа
         }
     }
 
