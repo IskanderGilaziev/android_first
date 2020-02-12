@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
 
     )
 
+    private var mapCheaterQuestions: Map<String, Boolean> = mapOf()
+
     private var currentIndex = 0
 
     private val TAG: String = "MainActivity"
@@ -35,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     private val currentIndexKey = "index"
     private val answerCountkey = "answerCountKey"
     private val successCountkey = "successCountkey"
+    private val cheatActiveKey = "isCheat" // признак того, что человек подсмотрел ответ
+  //  private val mapCheatQuestionsKey = "mapCheatQuestionsKey"
     private val REQUEST_CODE_CHEATS = 0
 
     private var successAnswerCount:Double = 0.0
@@ -48,6 +52,7 @@ class MainActivity : AppCompatActivity() {
             currentIndex = savedInstanceState.getInt(currentIndexKey, 0)
             answerCount = savedInstanceState.getInt(answerCountkey, questions.size)
             successAnswerCount = savedInstanceState.getDouble(successCountkey, 0.0)
+            isCheater = savedInstanceState.getBoolean(cheatActiveKey, false) // получение данных при перевороте экрана
         }
 
 
@@ -82,12 +87,12 @@ class MainActivity : AppCompatActivity() {
         val prevButton: ImageButton = findViewById(R.id.prev_button)
 
         prevButton.setOnClickListener {
-            if (currentIndex != 0) {
-                currentIndex = (currentIndex - 1) % questions.size
+            currentIndex = if (currentIndex != 0) {
+                (currentIndex - 1) % questions.size
             } else {
-                currentIndex = questions.size
+                questions.size
             }
-            removeQestion(textView)
+            removeQuestion(textView)
         }
 
         textView.setOnClickListener {
@@ -123,6 +128,10 @@ class MainActivity : AppCompatActivity() {
         outState.putInt(currentIndexKey, currentIndex)
         outState.putInt(answerCountkey, answerCount)
         outState.putDouble(successCountkey, successAnswerCount)
+        outState.putBoolean(cheatActiveKey, isCheater)// сохранение данных при перевороте экрана
+        for (entry  in mapCheaterQuestions) { // TODO додумать с переходом по кнопке next
+            outState.putBoolean(entry.key, entry.value)
+        }
     }
 
     private fun updateQuestion(textView: TextView) {
@@ -138,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         textView.text = text
     }
 
-    private fun removeQestion(textView: TextView){
+    private fun removeQuestion(textView: TextView){
         val prevQuestion: Int = if (currentIndex == 0) {
             questions[currentIndex].textResId
         } else {
