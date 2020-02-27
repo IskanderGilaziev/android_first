@@ -1,13 +1,18 @@
 package com.example.myapp
 
+import android.animation.Animator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.ViewAnimationUtils
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.animation.addListener
 
 class CheatActivity : AppCompatActivity() {
 
@@ -38,7 +43,11 @@ class CheatActivity : AppCompatActivity() {
         val isTrueAnswer = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
         val textAnswer: TextView = findViewById(R.id.answer_text_view)
         val showAnswerButton : Button = findViewById(R.id.show_answer_button)
-
+        // вывод версии сборки на экран ==>
+        val versionSdk: TextView = findViewById(R.id.show_version)
+        val text: String ="API level: " + Build.VERSION.SDK_INT.toString()
+        versionSdk.text = text
+        //<==
         showAnswerButton.setOnClickListener {
             if (isTrueAnswer) {
                 textAnswer.setText(R.string.true_button)
@@ -47,6 +56,18 @@ class CheatActivity : AppCompatActivity() {
             }
             isAnswerShown = true
             setAnswerShownResult(isAnswerShown)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { // проверка на версионность платформы, если меньше версия, то код не выполняется
+                val x = showAnswerButton.width / 2
+                val y = showAnswerButton.height / 2
+                val radius: Float = showAnswerButton.width.toFloat()
+                val animator: Animator =
+                    ViewAnimationUtils.createCircularReveal(showAnswerButton, x, y, radius, 0f)
+                animator.addListener { showAnswerButton.visibility = View.VISIBLE }
+                animator.start()
+            } else {
+                showAnswerButton.visibility = View.INVISIBLE
+            }
+
         }
         if (isAnswerShown) { // проверка на случай, если был поворот экрана и необходимо сохранить состояние просмотра ответа
             setAnswerShownResult(true)
