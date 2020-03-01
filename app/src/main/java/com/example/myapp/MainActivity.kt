@@ -44,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     private var successAnswerCount:Double = 0.0
     private var answerCount = questions.size
     private var isCheater: Boolean = false // признак того, что ответчик подсмотрел ответ
+    private val hintCountKey = "hintCountKey"
+    private var hintCount = 3 //количество нажатий на кнопку cheat
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,8 +55,8 @@ class MainActivity : AppCompatActivity() {
             answerCount = savedInstanceState.getInt(answerCountkey, questions.size)
             successAnswerCount = savedInstanceState.getDouble(successCountkey, 0.0)
             isCheater = savedInstanceState.getBoolean(cheatActiveKey, false) // получение данных при перевороте экрана
+            hintCount = savedInstanceState.getInt(hintCountKey, 3)
         }
-
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
@@ -63,6 +65,8 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
+
+        showHintInfo(hintCount) // показ на экране количества оставшихся подсказок
 
         val positive: Button = findViewById(R.id.true_button)
         val negative: Button = findViewById(R.id.false_button)
@@ -101,11 +105,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         val cheatsButton: Button = findViewById(R.id.cheat_button)
-
         cheatsButton.setOnClickListener {
-           val answerIsTrue = questions[currentIndex].answerTrue
+            val answerIsTrue = questions[currentIndex].answerTrue
             // получить информацию от дочерней активности
-            startActivityForResult(CheatActivity.newIntent(this, answerIsTrue), REQUEST_CODE_CHEATS)
+            startActivityForResult(
+                CheatActivity.newIntent(this, answerIsTrue, hintCount),
+                REQUEST_CODE_CHEATS
+            )
         }
 
         updateQuestion(textView)
@@ -129,7 +135,8 @@ class MainActivity : AppCompatActivity() {
         outState.putInt(answerCountkey, answerCount)
         outState.putDouble(successCountkey, successAnswerCount)
         outState.putBoolean(cheatActiveKey, isCheater)// сохранение данных при перевороте экрана
-        for (entry  in mapCheaterQuestions) { // TODO додумать с переходом по кнопке next
+        outState.putInt(hintCountKey, hintCount)
+        for (entry  in mapCheaterQuestions) {
             outState.putBoolean(entry.key, entry.value)
         }
     }
@@ -201,9 +208,21 @@ class MainActivity : AppCompatActivity() {
                 return
             }
             isCheater = CheatActivity.wasAnswerShown(data) // получение от дочерней активности результата подсмотра ответа
+            hintCount = CheatActivity.getHintCount(data) // получение количества попыток при нажатии на кнопку "Cheat"
+            showHintInfo(hintCount)
         }
     }
 
+
+    private fun showHintInfo(hintCount:Int) {
+        if (hintCount == 0) { // Отключение кнопки
+            val cheatsButton: Button = findViewById(R.id.cheat_button)
+            cheatsButton.isEnabled = false
+        }
+        val hintCountInfo: TextView = findViewById(R.id.hintCount) // показ количества подсказок
+        val hintText = "Your hint: $hintCount"
+        hintCountInfo.text = hintText
+    }
 
     override fun onRestart() {
         super.onRestart()
