@@ -22,10 +22,10 @@ class CheatActivity : AppCompatActivity() {
         private const val cheaterKey = "isCheaterActivity"
         private const val hintCountKey = "hintCountKey"
         fun newIntent(packageContext: Context, answerIsTrue: Boolean, hintCount: Int): Intent {
-            val intent = Intent(packageContext, CheatActivity::class.java)
-            intent.putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue)
-            intent.putExtra(hintCountKey, hintCount)
-            return intent
+            return Intent(packageContext, CheatActivity::class.java).apply {
+                putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue)
+                putExtra(hintCountKey, hintCount)
+            }
         }
 
         fun wasAnswerShown(intent: Intent): Boolean {
@@ -37,6 +37,10 @@ class CheatActivity : AppCompatActivity() {
         }
     }
 
+
+    private lateinit var textAnswer: TextView
+    private lateinit var showAnswerButton: Button
+    private lateinit var versionSdk: TextView
     private var isAnswerShown = false
     private var hintCount = 0
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,20 +52,20 @@ class CheatActivity : AppCompatActivity() {
 
         hintCount = intent.getIntExtra(hintCountKey, 3)
         val isTrueAnswer = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
-        val textAnswer: TextView = findViewById(R.id.answer_text_view)
-        val showAnswerButton : Button = findViewById(R.id.show_answer_button)
+        textAnswer = findViewById(R.id.answer_text_view)
+        showAnswerButton = findViewById(R.id.show_answer_button)
         // вывод версии сборки на экран ==>
-        val versionSdk: TextView = findViewById(R.id.show_version)
+        versionSdk = findViewById(R.id.show_version)
         val text: String ="API level: " + Build.VERSION.SDK_INT.toString()
         versionSdk.text = text
         //<==
         showAnswerButton.setOnClickListener {
             --hintCount
-            if (isTrueAnswer) {
-                textAnswer.setText(R.string.true_button)
-            } else {
-                textAnswer.setText(R.string.false_button)
+            val answerText = when {
+                isTrueAnswer -> R.string.true_button
+                else -> R.string.false_button
             }
+            textAnswer.setText(answerText)
             isAnswerShown = true
             setAnswerShownResult(isAnswerShown, hintCount)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { // проверка на версионность платформы, если меньше версия, то код не выполняется
@@ -85,9 +89,10 @@ class CheatActivity : AppCompatActivity() {
     // Сохранение результата дочерней активности
     // о том, что отвечающий подсмотрел ответ
     private fun setAnswerShownResult(isAnswerShown: Boolean, hintCount: Int) {
-        val intent = Intent()
-        intent.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown)
-        intent.putExtra(hintCountKey, hintCount)
+        val intent = Intent().apply {
+            putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown)
+            putExtra(hintCountKey, hintCount)
+        }
         setResult(Activity.RESULT_OK, intent)
     }
 

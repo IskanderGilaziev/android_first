@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         Question(R.string.question_asia, true)
 
     )
+    // TODO добавить  viewModel in project
 
     private var mapCheaterQuestions: Map<String, Boolean> = mapOf()
 
@@ -46,6 +47,13 @@ class MainActivity : AppCompatActivity() {
     private var isCheater: Boolean = false // признак того, что ответчик подсмотрел ответ
     private val hintCountKey = "hintCountKey"
     private var hintCount = 3 //количество нажатий на кнопку cheat
+
+    private lateinit var positive: Button
+    private lateinit var negative: Button
+    private lateinit var textView: TextView
+    private lateinit var nextButton: ImageButton
+    private lateinit var prevButton: ImageButton
+    private lateinit var cheatsButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,16 +76,15 @@ class MainActivity : AppCompatActivity() {
 
         showHintInfo(hintCount) // показ на экране количества оставшихся подсказок
 
-        val positive: Button = findViewById(R.id.true_button)
-        val negative: Button = findViewById(R.id.false_button)
+        positive = findViewById(R.id.true_button)
+        negative = findViewById(R.id.false_button)
 
         positive.setSafeOnClickListener { checkAnswer(true) }
         negative.setSafeOnClickListener { checkAnswer(false)  }
 
+        textView = findViewById(R.id.question_text_view)
 
-        val textView: TextView = findViewById(R.id.question_text_view)
-
-        val nextButton: ImageButton = findViewById(R.id.next_button)
+        nextButton = findViewById(R.id.next_button)
         nextButton.setOnClickListener {
             if (answerCount != 0) {
                 currentIndex = (currentIndex + 1) % questions.size
@@ -88,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val prevButton: ImageButton = findViewById(R.id.prev_button)
+        prevButton = findViewById(R.id.prev_button)
 
         prevButton.setOnClickListener {
             currentIndex = if (currentIndex != 0) {
@@ -104,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             updateQuestion(textView)
         }
 
-        val cheatsButton: Button = findViewById(R.id.cheat_button)
+        cheatsButton = findViewById(R.id.cheat_button)
         cheatsButton.setOnClickListener {
             val answerIsTrue = questions[currentIndex].answerTrue
             // получить информацию от дочерней активности
